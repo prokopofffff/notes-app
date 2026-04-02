@@ -1,0 +1,132 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="New Note">
+  <header class="header">
+    <button class="btn btn-ghost" id="back-btn">← Back</button>
+    <span class="header-title">New Note</span>
+    <button class="btn btn-primary" id="save-btn">Save</button>
+  </header>
+
+  <main class="container editor-main">
+    <div class="field">
+      <input
+        type="text"
+        id="title-input"
+        placeholder="Note title"
+        class="title-input"
+      />
+      <span class="field-error" id="title-error"></span>
+    </div>
+    <div class="field" style="flex:1; display:flex; flex-direction:column; margin-top: var(--space-4)">
+      <textarea
+        id="content-input"
+        placeholder="Write your note here…"
+        class="content-input"
+      ></textarea>
+      <span class="field-error" id="content-error"></span>
+    </div>
+    <div id="save-error" class="save-error" style="display:none"></div>
+  </main>
+</Base>
+
+<style>
+  .editor-main {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100vh - 56px);
+  }
+
+  .title-input {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    border-radius: var(--radius-md);
+  }
+
+  .content-input {
+    flex: 1;
+    min-height: 300px;
+    resize: vertical;
+    line-height: 1.7;
+  }
+
+  .save-error {
+    margin-top: var(--space-4);
+    padding: var(--space-3) var(--space-4);
+    background: #fff0f0;
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-danger);
+  }
+</style>
+
+<script>
+  import { api } from '../../lib/api';
+
+  // Auth guard
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  if (!token) {
+    window.location.href = '/';
+  }
+
+  const titleInput = document.getElementById('title-input') as HTMLInputElement;
+  const contentInput = document.getElementById('content-input') as HTMLTextAreaElement;
+  const titleError = document.getElementById('title-error') as HTMLElement;
+  const contentError = document.getElementById('content-error') as HTMLElement;
+  const saveError = document.getElementById('save-error') as HTMLElement;
+  const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+
+  document.getElementById('back-btn')!.addEventListener('click', () => {
+    window.location.href = '/notes';
+  });
+
+  function clearErrors(): void {
+    titleError.textContent = '';
+    contentError.textContent = '';
+    titleInput.classList.remove('error');
+    contentInput.classList.remove('error');
+    saveError.style.display = 'none';
+  }
+
+  function validate(): boolean {
+    let valid = true;
+    if (!titleInput.value.trim()) {
+      titleError.textContent = 'Title is required';
+      titleInput.classList.add('error');
+      valid = false;
+    }
+    if (!contentInput.value.trim()) {
+      contentError.textContent = 'Content is required';
+      contentInput.classList.add('error');
+      valid = false;
+    }
+    return valid;
+  }
+
+  function setLoading(loading: boolean): void {
+    saveBtn.disabled = loading;
+    saveBtn.innerHTML = loading ? '<span class="spinner"></span>' : 'Save';
+  }
+
+  saveBtn.addEventListener('click', async () => {
+    clearErrors();
+    if (!validate()) return;
+
+    setLoading(true);
+    try {
+      const note = await api.createNote({
+        title: titleInput.value.trim(),
+        content: contentInput.value.trim(),
+      });
+      window.location.href = `/notes/edit?id=${note.id}`;
+    } catch (err) {
+      saveError.textContent = err instanceof Error ? err.message : 'Failed to save note';
+      saveError.style.display = 'block';
+    } finally {
+      setLoading(false);
+    }
+  });
+</script>

@@ -1,0 +1,180 @@
+---
+import Base from '../../layouts/Base.astro';
+---
+<Base title="Edit Note">
+  <header class="header">
+    <button class="btn btn-ghost" id="back-btn">← Back</button>
+    <span class="header-title">Edit Note</span>
+    <button class="btn btn-primary" id="save-btn">Save</button>
+  </header>
+
+  <main class="container editor-main">
+    <div id="loading-state" style="text-align:center; padding: var(--space-12); color: var(--color-text-secondary); font-size: var(--text-sm)">
+      Loading…
+    </div>
+    <div id="error-state" style="display:none; text-align:center; padding: var(--space-12); color: var(--color-danger); font-size: var(--text-sm)"></div>
+
+    <div id="editor" style="display:none">
+      <div class="field">
+        <input
+          type="text"
+          id="title-input"
+          placeholder="Note title"
+          class="title-input"
+        />
+        <span class="field-error" id="title-error"></span>
+      </div>
+      <div class="field" style="margin-top: var(--space-4)">
+        <textarea
+          id="content-input"
+          placeholder="Write your note here…"
+          class="content-input"
+        ></textarea>
+        <span class="field-error" id="content-error"></span>
+      </div>
+      <div id="save-error" class="save-error" style="display:none; margin-top: var(--space-4)"></div>
+      <div id="save-success" class="save-success" style="display:none; margin-top: var(--space-4)">Saved!</div>
+    </div>
+  </main>
+</Base>
+
+<style>
+  .editor-main {
+    padding-top: var(--space-6);
+    padding-bottom: var(--space-6);
+    min-height: calc(100vh - 56px);
+  }
+
+  #editor {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .title-input {
+    font-size: var(--text-lg);
+    font-weight: 600;
+  }
+
+  .content-input {
+    min-height: 300px;
+    resize: vertical;
+    line-height: 1.7;
+  }
+
+  .save-error {
+    padding: var(--space-3) var(--space-4);
+    background: #fff0f0;
+    border: 1px solid var(--color-danger);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: var(--color-danger);
+  }
+
+  .save-success {
+    padding: var(--space-3) var(--space-4);
+    background: #f0fff4;
+    border: 1px solid #66bb6a;
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    color: #2e7d32;
+  }
+</style>
+
+<script>
+  import { api } from '../../lib/api';
+
+  // Auth guard
+  const token = typeof localStorage !== 'undefined' ? localStorage.getItem('token') : null;
+  if (!token) {
+    window.location.href = '/';
+  }
+
+  const params = new URLSearchParams(window.location.search);
+  const noteId = parseInt(params.get('id') ?? '', 10);
+
+  const loadingState = document.getElementById('loading-state')!;
+  const errorState = document.getElementById('error-state')!;
+  const editor = document.getElementById('editor')!;
+  const titleInput = document.getElementById('title-input') as HTMLInputElement;
+  const contentInput = document.getElementById('content-input') as HTMLTextAreaElement;
+  const titleError = document.getElementById('title-error') as HTMLElement;
+  const contentError = document.getElementById('content-error') as HTMLElement;
+  const saveError = document.getElementById('save-error') as HTMLElement;
+  const saveSuccess = document.getElementById('save-success') as HTMLElement;
+  const saveBtn = document.getElementById('save-btn') as HTMLButtonElement;
+
+  document.getElementById('back-btn')!.addEventListener('click', () => {
+    window.location.href = '/notes';
+  });
+
+  async function loadNote(): Promise<void> {
+    if (isNaN(noteId)) {
+      loadingState.style.display = 'none';
+      errorState.textContent = 'Invalid note ID';
+      errorState.style.display = 'block';
+      return;
+    }
+    try {
+      const note = await api.getNote(noteId);
+      titleInput.value = note.title;
+      contentInput.value = note.content;
+      loadingState.style.display = 'none';
+      editor.style.display = 'flex';
+    } catch (err) {
+      loadingState.style.display = 'none';
+      errorState.textContent = err instanceof Error ? err.message : 'Failed to load note';
+      errorState.style.display = 'block';
+    }
+  }
+
+  function clearErrors(): void {
+    titleError.textContent = '';
+    contentError.textContent = '';
+    titleInput.classList.remove('error');
+    contentInput.classList.remove('error');
+    saveError.style.display = 'none';
+    saveSuccess.style.display = 'none';
+  }
+
+  function validate(): boolean {
+    let valid = true;
+    if (!titleInput.value.trim()) {
+      titleError.textContent = 'Title is required';
+      titleInput.classList.add('error');
+      valid = false;
+    }
+    if (!contentInput.value.trim()) {
+      contentError.textContent = 'Content is required';
+      contentInput.classList.add('error');
+      valid = false;
+    }
+    return valid;
+  }
+
+  function setLoading(loading: boolean): void {
+    saveBtn.disabled = loading;
+    saveBtn.innerHTML = loading ? '<span class="spinner"></span>' : 'Save';
+  }
+
+  saveBtn.addEventListener('click', async () => {
+    clearErrors();
+    if (!validate()) return;
+
+    setLoading(true);
+    try {
+      await api.updateNote(noteId, {
+        title: titleInput.value.trim(),
+        content: contentInput.value.trim(),
+      });
+      saveSuccess.style.display = 'block';
+      setTimeout(() => { saveSuccess.style.display = 'none'; }, 2000);
+    } catch (err) {
+      saveError.textContent = err instanceof Error ? err.message : 'Failed to save note';
+      saveError.style.display = 'block';
+    } finally {
+      setLoading(false);
+    }
+  });
+
+  loadNote();
+</script>
