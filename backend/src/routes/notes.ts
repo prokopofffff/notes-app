@@ -6,14 +6,22 @@ const router = Router();
 
 // GET /api/notes — list current user's notes
 router.get('/', (req: Request, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
   const notes = db
     .prepare('SELECT id, title, content, created_at, updated_at FROM notes WHERE user_id = ? ORDER BY updated_at DESC')
-    .all(req.user!.id) as Note[];
+    .all(req.user.id) as Note[];
   res.json(notes);
 });
 
 // POST /api/notes — create note
 router.post('/', (req: Request<object, object, NoteRequestBody>, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
   const { title, content } = req.body;
 
   if (!title || !content) {
@@ -23,7 +31,7 @@ router.post('/', (req: Request<object, object, NoteRequestBody>, res: Response):
 
   const result = db
     .prepare('INSERT INTO notes (user_id, title, content) VALUES (?, ?, ?)')
-    .run(req.user!.id, title, content);
+    .run(req.user.id, title, content);
 
   const note = db
     .prepare('SELECT id, title, content, created_at, updated_at FROM notes WHERE id = ?')
@@ -34,6 +42,10 @@ router.post('/', (req: Request<object, object, NoteRequestBody>, res: Response):
 
 // GET /api/notes/:id — get single note
 router.get('/:id', (req: Request, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
   const note = db
     .prepare('SELECT id, user_id, title, content, created_at, updated_at FROM notes WHERE id = ?')
     .get(req.params['id']) as Note | undefined;
@@ -43,7 +55,7 @@ router.get('/:id', (req: Request, res: Response): void => {
     return;
   }
 
-  if (note.user_id !== req.user!.id) {
+  if (note.user_id !== req.user.id) {
     res.status(403).json({ error: 'Forbidden' });
     return;
   }
@@ -53,6 +65,10 @@ router.get('/:id', (req: Request, res: Response): void => {
 
 // PUT /api/notes/:id — update note
 router.put('/:id', (req: Request<{ id: string }, object, NoteRequestBody>, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
   const note = db
     .prepare('SELECT * FROM notes WHERE id = ?')
     .get(req.params['id']) as Note | undefined;
@@ -62,7 +78,7 @@ router.put('/:id', (req: Request<{ id: string }, object, NoteRequestBody>, res: 
     return;
   }
 
-  if (note.user_id !== req.user!.id) {
+  if (note.user_id !== req.user.id) {
     res.status(403).json({ error: 'Forbidden' });
     return;
   }
@@ -86,6 +102,10 @@ router.put('/:id', (req: Request<{ id: string }, object, NoteRequestBody>, res: 
 
 // DELETE /api/notes/:id — delete note
 router.delete('/:id', (req: Request, res: Response): void => {
+  if (!req.user) {
+    res.status(401).json({ error: 'Unauthorized' });
+    return;
+  }
   const note = db
     .prepare('SELECT * FROM notes WHERE id = ?')
     .get(req.params['id']) as Note | undefined;
@@ -95,7 +115,7 @@ router.delete('/:id', (req: Request, res: Response): void => {
     return;
   }
 
-  if (note.user_id !== req.user!.id) {
+  if (note.user_id !== req.user.id) {
     res.status(403).json({ error: 'Forbidden' });
     return;
   }

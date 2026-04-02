@@ -7,7 +7,7 @@ import type { LoginRequestBody, User } from '../types';
 
 const router = Router();
 
-router.post('/login', (req: Request<object, object, LoginRequestBody>, res: Response): void => {
+router.post('/login', async (req: Request<object, object, LoginRequestBody>, res: Response): Promise<void> => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -21,7 +21,7 @@ router.post('/login', (req: Request<object, object, LoginRequestBody>, res: Resp
     return;
   }
 
-  const valid = bcrypt.compareSync(password, user.password_hash);
+  const valid = await bcrypt.compare(password, user.password_hash);
   if (!valid) {
     res.status(401).json({ error: 'Invalid credentials' });
     return;
@@ -30,7 +30,7 @@ router.post('/login', (req: Request<object, object, LoginRequestBody>, res: Resp
   const token = jwt.sign(
     { user_id: user.id, username: user.username },
     JWT_SECRET,
-    { expiresIn: JWT_EXPIRES_IN as `${number}${'s' | 'm' | 'h' | 'd' | 'w' | 'y'}` }
+    { expiresIn: JWT_EXPIRES_IN }
   );
 
   res.json({ token });

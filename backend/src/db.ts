@@ -29,21 +29,23 @@ db.exec(`
   );
 `);
 
-// Seed users if they don't exist
-const seedUsers: Array<{ username: string; password: string }> = [
-  { username: 'alice', password: 'alice123' },
-  { username: 'bob', password: 'bob123' },
-];
+// Seed users only in non-production environments
+if (process.env.NODE_ENV !== 'production') {
+  const seedUsers: Array<{ username: string; password: string }> = [
+    { username: 'alice', password: 'alice123' },
+    { username: 'bob', password: 'bob123' },
+  ];
 
-const insertUser = db.prepare(
-  'INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)'
-);
+  const insertUser = db.prepare(
+    'INSERT OR IGNORE INTO users (username, password_hash) VALUES (?, ?)'
+  );
 
-for (const user of seedUsers) {
-  const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(user.username);
-  if (!existing) {
-    const hash = bcrypt.hashSync(user.password, 10);
-    insertUser.run(user.username, hash);
+  for (const user of seedUsers) {
+    const existing = db.prepare('SELECT id FROM users WHERE username = ?').get(user.username);
+    if (!existing) {
+      const hash = bcrypt.hashSync(user.password, 10);
+      insertUser.run(user.username, hash);
+    }
   }
 }
 

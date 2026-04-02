@@ -48,11 +48,3 @@ export interface NoteRequestBody {
   content: string;
 }
 
-// Response types
-export interface LoginResponse {
-  token: string;
-}
-
-export interface ErrorResponse {
-  error: string;
-}
