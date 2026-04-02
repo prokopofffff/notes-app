@@ -1,0 +1,26 @@
+{
+  "mcpServers": {
+    "orchestra-signal-tool": {
+      "command": "node",
+      "args": [
+        "/Users/jonya_ko/job/ai-orchestra/mcp-tools/signal-tool/dist/index.js"
+      ],
+      "env": {
+        "ORCHESTRA_URL": "http://localhost:3000",
+        "AGENT_ROLE": "tech-lead",
+        "AGENT_PROJECT_ID": "1071bdde-38d0-485d-bf37-e3a79d496523"
+      }
+    },
+    "orchestra-task-tool": {
+      "command": "node",
+      "args": [
+        "/Users/jonya_ko/job/ai-orchestra/mcp-tools/task-tool/dist/index.js"
+      ],
+      "env": {
+        "ORCHESTRA_URL": "http://localhost:3000",
+        "AGENT_ROLE": "tech-lead",
+        "AGENT_PROJECT_ID": "1071bdde-38d0-485d-bf37-e3a79d496523"
+      }
+    }
+  }
+}
