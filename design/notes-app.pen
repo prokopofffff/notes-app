@@ -1,0 +1,487 @@
+# Notes App — UI Design Spec
+# Format: .pen (UI blueprint)
+# Style: Minimalist, gray-white palette, system sans-serif
+
+---
+
+## DESIGN TOKENS
+
+colors:
+  background:    #f5f5f5   # page background
+  surface:       #ffffff   # card / input background
+  border:        #e0e0e0   # subtle borders, dividers
+  placeholder:   #9e9e9e   # placeholder text, secondary labels
+  body:          #424242   # primary text
+  heading:       #333333   # headings, active buttons
+  accent:        #333333   # CTA buttons
+  accent-text:   #ffffff   # text on accent buttons
+  danger:        #c62828   # destructive actions
+  danger-soft:   #ffebee   # danger hover bg
+
+typography:
+  font-family:   system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+  sizes:
+    xs:   11px
+    sm:   13px
+    base: 15px
+    md:   17px
+    lg:   22px
+    xl:   28px
+  weights:
+    regular: 400
+    medium:  500
+    bold:    600
+
+spacing:
+  xs:   4px
+  sm:   8px
+  md:   16px
+  lg:   24px
+  xl:   40px
+  2xl:  64px
+
+radii:
+  sm:  4px
+  md:  8px
+  lg:  12px
+  pill: 999px
+
+shadows:
+  card:  0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04)
+  modal: 0 4px 16px rgba(0,0,0,0.12)
+
+breakpoints:
+  mobile:  < 640px
+  tablet:  640px–1024px
+  desktop: > 1024px
+
+---
+
+## SCREEN 1 — Login
+
+layout:
+  type: centered-single-column
+  max-width: 400px
+  padding: xl (40px) on all sides
+  background: #f5f5f5
+  vertically: centered (min-height 100vh)
+
+structure:
+  [Logo / App Name]
+    text: "Notes"
+    size: xl (28px)
+    weight: bold (600)
+    color: #333333
+    align: center
+    margin-bottom: lg (24px)
+
+  [Tagline]
+    text: "Your thoughts, organized."
+    size: sm (13px)
+    color: #9e9e9e
+    align: center
+    margin-bottom: xl (40px)
+
+  [Login Card]
+    background: #ffffff
+    border-radius: md (8px)
+    padding: lg (24px)
+    shadow: card
+
+    [Field: Username]
+      label: "Username"
+        size: sm (13px)
+        weight: medium (500)
+        color: #424242
+        margin-bottom: xs (4px)
+      input:
+        type: text
+        placeholder: "Enter your username"
+        height: 44px
+        padding: 0 md (16px)
+        background: #f5f5f5
+        border: 1px solid #e0e0e0
+        border-radius: sm (4px)
+        font-size: base (15px)
+        color: #424242
+        width: 100%
+      states:
+        focus:  border-color #333333, outline none
+        error:  border-color #c62828
+        filled: background #ffffff
+
+    [Spacer: md (16px)]
+
+    [Field: Password]
+      label: "Password"
+        size: sm (13px)
+        weight: medium (500)
+        color: #424242
+        margin-bottom: xs (4px)
+      input:
+        type: password
+        placeholder: "Enter your password"
+        height: 44px
+        padding: 0 md (16px)
+        background: #f5f5f5
+        border: 1px solid #e0e0e0
+        border-radius: sm (4px)
+        font-size: base (15px)
+        color: #424242
+        width: 100%
+      states:
+        focus:  border-color #333333, outline none
+        error:  border-color #c62828
+        filled: background #ffffff
+
+    [Spacer: lg (24px)]
+
+    [Button: "Войти"]
+      type: primary
+      width: 100%
+      height: 48px
+      background: #333333
+      color: #ffffff
+      font-size: base (15px)
+      font-weight: medium (500)
+      border: none
+      border-radius: sm (4px)
+      cursor: pointer
+      states:
+        hover:   background #424242
+        active:  background #1a1a1a, scale(0.99)
+        loading: show spinner (16px white), disable pointer-events
+        disabled: opacity 0.5, cursor not-allowed
+
+  [Error Banner] — shown on failed login
+    margin-top: md (16px)
+    padding: sm (8px) md (16px)
+    background: #ffebee
+    border-left: 3px solid #c62828
+    border-radius: sm (4px)
+    text: error message string
+    font-size: sm (13px)
+    color: #c62828
+
+mobile:
+  max-width: 100%
+  padding: md (16px)
+  card: no shadow, border-radius 0, full-width flush
+
+---
+
+## SCREEN 2 — Notes List
+
+layout:
+  type: single-column with top bar
+  max-width: 720px
+  margin: 0 auto
+  background: #f5f5f5
+  min-height: 100vh
+
+structure:
+  [Top Bar]
+    position: sticky top 0
+    height: 56px
+    background: #ffffff
+    border-bottom: 1px solid #e0e0e0
+    padding: 0 md (16px)
+    display: flex, align-items center, justify-content space-between
+    shadow: 0 1px 0 #e0e0e0
+
+    [App Title]
+      text: "Notes"
+      font-size: md (17px)
+      font-weight: bold (600)
+      color: #333333
+
+    [Button: "+ Новая заметка"]
+      type: primary compact
+      height: 36px
+      padding: 0 md (16px)
+      background: #333333
+      color: #ffffff
+      font-size: sm (13px)
+      font-weight: medium (500)
+      border-radius: sm (4px)
+      states:
+        hover:  background #424242
+        active: background #1a1a1a
+
+  [Content Area]
+    padding: md (16px)
+
+    [State: Loading]
+      show 3 skeleton cards:
+        height: 90px
+        background: linear-gradient(90deg, #e0e0e0 25%, #f5f5f5 50%, #e0e0e0 75%)
+        border-radius: md (8px)
+        animation: shimmer 1.4s infinite
+        margin-bottom: sm (8px)
+
+    [State: Empty]
+      display: flex, flex-direction column, align-items center
+      padding-top: 2xl (64px)
+      [Icon]
+        size: 48px
+        color: #e0e0e0
+        (pencil/document outline icon)
+      [Text: "Нет заметок"]
+        font-size: md (17px)
+        font-weight: medium (500)
+        color: #9e9e9e
+        margin-top: md (16px)
+      [Subtext]
+        text: "Нажмите «+ Новая заметка», чтобы начать"
+        font-size: sm (13px)
+        color: #9e9e9e
+        margin-top: xs (4px)
+
+    [State: List — Note Card] × N
+      background: #ffffff
+      border-radius: md (8px)
+      shadow: card
+      padding: md (16px)
+      margin-bottom: sm (8px)
+      display: flex, justify-content space-between, align-items flex-start
+      cursor: pointer
+      transition: box-shadow 150ms ease
+
+      [Left: Content]
+        flex: 1
+        min-width: 0
+
+        [Title]
+          font-size: base (15px)
+          font-weight: medium (500)
+          color: #333333
+          white-space: nowrap
+          overflow: hidden
+          text-overflow: ellipsis
+
+        [Preview]
+          font-size: sm (13px)
+          color: #9e9e9e
+          margin-top: xs (4px)
+          max-lines: 2
+          overflow: hidden
+          display: -webkit-box
+          -webkit-line-clamp: 2
+
+        [Date]
+          font-size: xs (11px)
+          color: #9e9e9e
+          margin-top: sm (8px)
+          format: "2 апр 2026"
+
+      [Right: Actions]
+        display: flex
+        gap: xs (4px)
+        margin-left: md (16px)
+        flex-shrink: 0
+
+        [Button: Edit]
+          icon: pencil (16px)
+          width: 32px, height: 32px
+          background: transparent
+          border: none
+          border-radius: sm (4px)
+          color: #9e9e9e
+          states:
+            hover: background #f5f5f5, color #424242
+
+        [Button: Delete]
+          icon: trash (16px)
+          width: 32px, height: 32px
+          background: transparent
+          border: none
+          border-radius: sm (4px)
+          color: #9e9e9e
+          states:
+            hover: background #ffebee, color #c62828
+
+      card hover state:
+        shadow: 0 4px 12px rgba(0,0,0,0.10)
+
+    [Delete Confirmation] — inline below card or modal
+      modal:
+        background: #ffffff
+        border-radius: lg (12px)
+        padding: lg (24px)
+        shadow: modal
+        max-width: 320px
+        centered overlay (rgba(0,0,0,0.3))
+        text: "Удалить заметку?"
+          font-size: md (17px), weight bold
+        subtext: "Это действие нельзя отменить."
+          font-size: sm (13px), color #9e9e9e, margin-top xs
+        buttons row (margin-top lg):
+          [Cancel] secondary: border 1px #e0e0e0, bg white, color #424242
+          [Delete] danger:    bg #c62828, color white
+          gap: sm (8px), both height 44px, border-radius sm
+
+mobile (< 640px):
+  top bar: padding 0 sm (8px)
+  content area: padding sm (8px)
+  note card: actions always visible (no hover needed)
+
+---
+
+## SCREEN 3 — Note Editor
+
+layout:
+  type: full-screen editor
+  background: #ffffff
+  min-height: 100vh
+
+structure:
+  [Top Bar]
+    position: sticky top 0
+    height: 56px
+    background: #ffffff
+    border-bottom: 1px solid #e0e0e0
+    padding: 0 md (16px)
+    display: flex, align-items center, gap sm (8px)
+    shadow: 0 1px 0 #e0e0e0
+
+    [Button: "← Назад"]
+      type: ghost
+      height: 36px
+      padding: 0 sm (8px)
+      background: transparent
+      border: none
+      border-radius: sm (4px)
+      color: #424242
+      font-size: sm (13px)
+      display: flex, align-items center, gap xs (4px)
+      icon: chevron-left (16px)
+      states:
+        hover: background #f5f5f5
+
+    [Spacer: flex 1]
+
+    [Mode Label] — optional, shown when editing existing note
+      text: "Редактирование" or empty for new
+      font-size: xs (11px)
+      color: #9e9e9e
+
+    [Button: "Сохранить"]
+      type: primary
+      height: 36px
+      padding: 0 md (16px)
+      background: #333333
+      color: #ffffff
+      font-size: sm (13px)
+      font-weight: medium (500)
+      border-radius: sm (4px)
+      states:
+        hover:    background #424242
+        active:   background #1a1a1a
+        loading:  show spinner, disable
+        disabled: opacity 0.5 (when no changes made)
+
+  [Editor Area]
+    padding: lg (24px) md (16px)
+    max-width: 720px
+    margin: 0 auto
+
+    [Title Input]
+      type: textarea (auto-height, single-line feel)
+      placeholder: "Заголовок"
+      font-size: xl (28px)
+      font-weight: bold (600)
+      color: #333333
+      border: none
+      outline: none
+      resize: none
+      width: 100%
+      background: transparent
+      padding: 0
+      placeholder-color: #e0e0e0
+      line-height: 1.2
+
+    [Divider]
+      height: 1px
+      background: #e0e0e0
+      margin: md (16px) 0
+
+    [Content Textarea]
+      type: textarea
+      placeholder: "Начните писать…"
+      font-size: base (15px)
+      color: #424242
+      line-height: 1.7
+      border: none
+      outline: none
+      resize: none
+      width: 100%
+      background: transparent
+      padding: 0
+      placeholder-color: #e0e0e0
+      min-height: calc(100vh - 56px - 80px)
+      vertical-align: top
+
+  [State: Saving]
+    top bar "Сохранить" button shows spinner
+    inputs remain editable
+
+  [State: Saved Toast]
+    position: fixed bottom lg (24px) center
+    background: #333333
+    color: #ffffff
+    font-size: sm (13px)
+    padding: sm (8px) md (16px)
+    border-radius: pill (999px)
+    shadow: modal
+    text: "Сохранено"
+    animation: fade-in 150ms ease, auto-dismiss after 2s, fade-out 300ms
+
+  [State: Unsaved Changes Warning] — on "Назад" press with unsaved changes
+    modal (same style as delete confirmation):
+      text: "Несохранённые изменения"
+      subtext: "Вы уверены, что хотите выйти? Изменения не будут сохранены."
+      buttons:
+        [Остаться]  secondary
+        [Выйти]     primary (bg #333333)
+
+mobile (< 640px):
+  editor area: padding md (16px) sm (8px)
+  title font-size: lg (22px)
+  top bar: compact, label hidden
+
+---
+
+## COMPONENT REFERENCE
+
+Button variants:
+  primary:    bg #333333, color #ffffff, hover #424242
+  secondary:  bg #ffffff, border 1px #e0e0e0, color #424242, hover bg #f5f5f5
+  ghost:      bg transparent, border none, color #424242, hover bg #f5f5f5
+  danger:     bg #c62828, color #ffffff, hover bg #b71c1c
+  icon-ghost: 32×32px, border-radius sm, same ghost rules
+
+Input:
+  height: 44px
+  bg: #f5f5f5
+  border: 1px solid #e0e0e0
+  border-radius: sm (4px)
+  focus: border-color #333333
+  error: border-color #c62828
+  font-size: base (15px)
+  color: #424242
+
+Card:
+  bg: #ffffff
+  border-radius: md (8px)
+  shadow: card
+  padding: md (16px)
+
+Toast:
+  bg: #333333
+  color: #ffffff
+  border-radius: pill
+  shadow: modal
+  font-size: sm
+
+Modal overlay: rgba(0,0,0,0.30)
+Modal panel:   bg white, border-radius lg, shadow modal, padding lg
