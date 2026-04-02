@@ -33,7 +33,7 @@ router.post('/', (req, res) => {
 // GET /api/notes/:id — get single note
 router.get('/:id', (req, res) => {
   const note = db
-    .prepare('SELECT id, title, content, created_at, updated_at FROM notes WHERE id = ?')
+    .prepare('SELECT id, user_id, title, content, created_at, updated_at FROM notes WHERE id = ?')
     .get(req.params.id);
 
   if (!note) {
